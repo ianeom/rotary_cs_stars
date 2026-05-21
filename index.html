@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: #f0f4f8; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: #f4f7fa; }
         .rotary-blue { background-color: #0c2340; }
         .rotary-gold { color: #8a704c; }
-        .border-rotary-gold { border-color: #8a704c; }
+        .bg-rotary-gold { background-color: #8a704c; }
     </style>
 </head>
 <body>
@@ -27,34 +27,64 @@
 
     <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-amber-50 to-orange-100 p-5 rounded-xl border border-amber-200 shadow-sm flex items-center space-x-4">
-                <div class="bg-amber-500 text-white p-3 rounded-full shadow-md">
-                    <i class="fa-solid fa-trophy text-2xl"></i>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                <i class="fa-solid fa-crown text-amber-500 mr-2"></i> 2026-27 年度·星光總冠軍 (累積榜)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-5 rounded-xl relative overflow-hidden shadow-md">
+                    <span class="bg-amber-500 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-full font-bold tracking-wider">戰隊榜首</span>
+                    <h3 class="text-xl font-black mt-2 text-yellow-400">Team 2 織女星</h3>
+                    <p class="text-xs text-slate-400 mt-1">總積分 <span class="text-white font-bold">580 ☆</span></p>
                 </div>
-                <div>
-                    <p class="text-xs text-amber-700 font-bold uppercase tracking-wider">本月冠軍戰隊 (5月)</p>
-                    <p class="text-xl font-black text-slate-800">Team 2 織女星</p>
+                <div class="bg-gradient-to-r from-amber-600 to-amber-700 text-white p-5 rounded-xl relative overflow-hidden shadow-md">
+                    <span class="bg-white text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full font-bold tracking-wider">個人最高分</span>
+                    <h3 class="text-xl font-black mt-2">Ian / Team 2</h3>
+                    <p class="text-xs text-amber-100 mt-1">累積 <span class="white font-bold">95 ☆</span></p>
                 </div>
-            </div>
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-5 rounded-xl border border-blue-200 shadow-sm flex items-center space-x-4">
-                <div class="bg-indigo-600 text-white p-3 rounded-full shadow-md">
-                    <i class="fa-solid fa-medal text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-indigo-700 font-bold uppercase tracking-wider">本季摘星 MVP</p>
-                    <p class="text-xl font-black text-slate-800">AlanWen / Team 1</p>
-                </div>
-            </div>
-            <div class="bg-gradient-to-br from-emerald-50 to-teal-100 p-5 rounded-xl border border-emerald-200 shadow-sm flex items-center space-x-4">
-                <div class="bg-emerald-600 text-white p-3 rounded-full shadow-md">
-                    <i class="fa-solid fa-star-and-crescent text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-emerald-700 font-bold uppercase tracking-wider">全社已摘星星總數</p>
-                    <p class="text-2xl font-black text-slate-800">1,845 <span class="text-sm font-normal text-emerald-600">☆</span></p>
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 rounded-xl relative overflow-hidden shadow-md">
+                    <span class="bg-emerald-500 text-white text-[10px] font-black px-2 py-0.5 border border-emerald-400 rounded-full font-bold tracking-wider">全社總摘星(含社長)</span>
+                    <h3 class="text-2xl font-black mt-2" id="totalClubStars">1,965 ☆</h3>
+                    <p class="text-xs text-emerald-100 mt-1">全員共同配合地區摘星</p>
                 </div>
             </div>
+        </div>
+
+        <div onclick="openModal('Janice')" class="bg-gradient-to-r from-blue-50 to-amber-50 p-5 rounded-2xl border border-amber-300/60 shadow-xs flex justify-between items-center cursor-pointer hover:shadow-md transition-all">
+            <div class="flex items-center space-x-4">
+                <div class="bg-rotary-gold text-white p-3 rounded-full shadow-sm">
+                    <i class="fa-solid fa-user-tie text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs bg-slate-900 text-white font-black px-2 py-0.5 rounded-sm">26-27 本社社長</span>
+                        <span class="text-xs text-slate-400">💡 點擊看社長摘星明細</span>
+                    </div>
+                    <p class="text-xl font-black text-slate-800 mt-0.5">Janice</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">社長個人貢獻</p>
+                <p class="text-2xl font-black text-amber-700">120 <span class="text-sm font-normal text-slate-400">☆</span></p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-calendar-check text-indigo-600 mr-2"></i> 月度戰況與歷史得獎牆
+                    </h2>
+                </div>
+                <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+                    <button onclick="switchMonth('7')" id="btn-7" class="month-btn px-3 py-1.5 rounded-lg transition text-slate-600">7月</button>
+                    <button onclick="switchMonth('8')" id="btn-8" class="month-btn px-3 py-1.5 rounded-lg transition text-slate-600">8月</button>
+                    <button onclick="switchMonth('9')" id="btn-9" class="month-btn px-3 py-1.5 rounded-lg transition text-slate-600">9月</button>
+                    <button onclick="switchMonth('10')" id="btn-10" class="month-btn px-3 py-1.5 rounded-lg transition text-slate-600">10月</button>
+                    <button onclick="switchMonth('current')" id="btn-current" class="month-btn px-3 py-1.5 rounded-lg transition bg-white text-indigo-600 shadow-sm">本月風雲 (5月)</button>
+                </div>
+            </div>
+            <div id="monthShowcase" class="bg-slate-50 p-4 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
 
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -68,16 +98,16 @@
                         <span class="text-indigo-600">540 ☆</span>
                     </div>
                     <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
-                        <div class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 85%;"></div>
+                        <div class="bg-blue-600 h-full rounded-full" style="width: 85%;"></div>
                     </div>
                 </div>
                 <div>
                     <div class="flex justify-between text-sm font-semibold mb-1">
                         <span class="text-slate-700">Team 2 織女星 (Francesca 隊) ✨</span>
-                        <span class="text-amber-600">580 ☆ (領先)</span>
+                        <span class="text-amber-600">580 ☆ (目前領先)</span>
                     </div>
                     <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
-                        <div class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 92%;"></div>
+                        <div class="bg-amber-500 h-full rounded-full" style="width: 92%;"></div>
                     </div>
                 </div>
                 <div>
@@ -86,7 +116,7 @@
                         <span class="text-slate-700">420 ☆</span>
                     </div>
                     <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 68%;"></div>
+                        <div class="bg-emerald-500 h-full rounded-full" style="width: 68%;"></div>
                     </div>
                 </div>
                 <div>
@@ -95,17 +125,20 @@
                         <span class="text-slate-700">305 ☆</span>
                     </div>
                     <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
-                        <div class="bg-purple-500 h-full rounded-full transition-all duration-500" style="width: 50%;"></div>
+                        <div class="bg-purple-500 h-full rounded-full" style="width: 50%;"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-                <h2 class="text-lg font-bold text-slate-800 flex items-center">
-                    <i class="fa-solid fa-list-ol text-indigo-600 mr-2"></i> 社友個人星光排行總榜
-                </h2>
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                        <i class="fa-solid fa-list-ol text-indigo-600 mr-2"></i> 社友個人星光排行總榜
+                    </h2>
+                    <p class="text-xs text-slate-400">💡 提示：點擊任一社友欄位，即可查看該員「星星獲得明細履歷」</p>
+                </div>
                 <div class="flex items-center space-x-2">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
@@ -127,70 +160,238 @@
                             <th class="py-3 px-4 text-right">目前累積星星</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboardBody" class="divide-y divide-slate-50 text-sm text-slate-700">
-                        </tbody>
+                    <tbody id="leaderboardBody" class="divide-y divide-slate-50 text-sm text-slate-700"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <footer class="text-center py-8 text-xs text-slate-400">
-        台北中山扶輪社 秘書處 2026 數位創新服務
-    </footer>
+    <div id="detailsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center hidden z-50 p-4" onclick="closeModalOutside(event)">
+        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+            <div class="rotary-blue p-6 text-white flex justify-between items-center">
+                <div>
+                    <span id="modalTeam" class="text-[10px] bg-yellow-500 text-slate-900 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+                    <h3 id="modalName" class="text-2xl font-black mt-1"></h3>
+                </div>
+                <button onclick="closeModal()" class="text-white/70 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[400px] overflow-y-auto" id="modalDetailsList"></div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-between items-center">
+                <span class="text-xs text-slate-400">數據核算基準：中山秘書處後台</span>
+                <div class="text-sm font-bold text-slate-700">總計：<span id="modalTotalStars" class="text-indigo-600 font-black text-lg"></span> ☆</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-8 text-xs text-slate-400">台北中山扶輪社 秘書處 2026 數位創新服務</footer>
 
     <script>
-        // 匯入你先前確認過的全英文不含出席異常者的乾淨名單
-        const initialMembers = [
-            { name: 'AlanWen', team: 'Team 1 天狼星', stars: 85 },
-            { name: 'Avic', team: 'Team 1 天狼星', stars: 70 },
-            { name: 'Aking', team: 'Team 1 天狼星', stars: 65 },
-            { name: 'Calvin', team: 'Team 1 天狼星', stars: 55 },
-            { name: 'Charles', team: 'Team 1 天狼星', stars: 50 },
-            { name: 'David', team: 'Team 1 天狼星', stars: 45 },
-            { name: 'Ivan', team: 'Team 1 天狼星', stars: 10 },
-            { name: 'Jennifer', team: 'Team 1 天狼星', stars: 5 },
+        const monthlyHistory = {
+            '7': { team: 'Team 1 天狼星', mvp: 'AlanWen', desc: '創社開敲首月，天狼星引薦多位新血拔得頭籌！' },
+            '8': { team: 'Team 3 北極星', mvp: 'Leo', desc: '聯合捐血服務大出擊，北極星全員志工拿下單月最高分！' },
+            '9': { team: 'Team 4 大熊星', mvp: 'Sunivy', desc: '九合一移動例會高出席率，大熊星前輩群發威逆轉。' },
+            '10': { team: 'Team 1 天狼星', mvp: 'Avic', desc: '地區講習會大動員，天狼星創下出席率神話。' },
+            'current': { team: 'Team 2 織女星', mvp: 'Jenny', desc: '大嫂團全面動員參與地區眷聯聚會，織女星奪下本月冠軍錦旗！' }
+        };
+
+        function switchMonth(monthKey) {
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.className = "month-btn px-3 py-1.5 rounded-lg transition text-slate-600";
+            });
+            const activeBtn = document.getElementById(`btn-${monthKey}`);
+            if(activeBtn) activeBtn.className = "month-btn px-3 py-1.5 rounded-lg transition bg-white text-indigo-600 shadow-sm";
+
+            const data = monthlyHistory[monthKey];
+            const displayTitle = monthKey === 'current' ? '本月 (5月)' : `${monthKey}月份`;
             
-            { name: 'Jenny', team: 'Team 2 織女星', stars: 90 },
-            { name: 'Fong', team: 'Team 2 織女星', stars: 80 },
-            { name: 'Hank', team: 'Team 2 織女星', stars: 75 },
-            { name: 'Ian', team: 'Team 2 織女星', stars: 65 },
-            { name: 'Jay', team: 'Team 2 織女星', stars: 60 },
-            { name: 'Jason', team: 'Team 2 織女星', stars: 55 },
-            { name: 'James', team: 'Team 2 織女星', stars: 50 },
-            { name: 'Kim', team: 'Team 2 織女星', stars: 40 },
-            { name: 'Melvin', team: 'Team 2 織女星', stars: 15 },
+            document.getElementById('monthShowcase').innerHTML = `
+                <div class="flex items-center space-x-3 bg-white p-4 rounded-lg shadow-2xs border border-slate-100">
+                    <div class="bg-amber-100 text-amber-600 p-3 rounded-full font-black">🏆</div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">${displayTitle} 冠軍戰隊</p>
+                        <p class="text-lg font-black text-slate-800">${data.team}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3 bg-white p-4 rounded-lg shadow-2xs border border-slate-100">
+                    <div class="bg-indigo-100 text-indigo-600 p-3 rounded-full font-black">🎖️</div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">${displayTitle} 摘星 MVP</p>
+                        <p class="text-lg font-black text-slate-800">${data.mvp}</p>
+                    </div>
+                </div>
+                <div class="md:col-span-2 text-xs text-slate-500 bg-white p-3 rounded-lg border border-slate-100">
+                    <i class="fa-solid fa-quote-left text-slate-300 mr-1"></i> <strong>戰況回顧：</strong>${data.desc}
+                </div>
+            `;
+        }
 
-            { name: 'Leo', team: 'Team 3 北極星', stars: 80 },
-            { name: 'Lisa', team: 'Team 3 北極星', stars: 75 },
-            { name: 'Larry', team: 'Team 3 北極星', stars: 60 },
-            { name: 'Louis', team: 'Team 3 北極星', stars: 55 },
-            { name: 'Liang', team: 'Team 3 北極星', stars: 50 },
-            { name: 'Michael', team: 'Team 3 北極星', stars: 45 },
-            { name: 'Marine', team: 'Team 3 北極星', stars: 40 },
-            { name: 'Michelle', team: 'Team 3 北極星', stars: 35 },
-            { name: 'Rich', team: 'Team 3 北極星', stars: 20 },
-
-            { name: 'Stanley', team: 'Team 4 大熊星', stars: 65 },
-            { name: 'Maria', team: 'Team 4 大熊星', stars: 55 },
-            { name: 'Neo', team: 'Team 4 大熊星', stars: 50 },
-            { name: 'Sunivy', team: 'Team 4 大熊星', stars: 45 },
-            { name: 'Sean', team: 'Team 4 大熊星', stars: 40 },
-            { name: 'Vincent', team: 'Team 4 大熊星', stars: 30 },
-            { name: 'West', team: 'Team 4 大熊星', stars: 25 },
-            { name: 'Vivian', team: 'Team 4 大熊星', stars: 10 }
+        // 核心名單數據庫
+        const initialMembers = [
+            { name: 'Janice', team: '扶輪社社長 (不參與戰隊)', stars: 120, details: [
+                { task: '扶輪基金奉獻', note: '年度個人捐款與保羅哈里斯之友完成', score: 60 },
+                { task: '優化管理績效', note: '帶領團隊完成 RCC 課程與目標登錄', score: 30 },
+                { task: '形象提升推廣', note: '安排社友與媒體談話及月刊投稿成功', score: 30 }
+            ]},
+            { name: 'Jenny', team: 'Team 2 織女星', stars: 90, details: [
+                { task: '聯誼常態例會', note: '7-5月全勤親自出席', score: 50 },
+                { task: '寶眷榮耀加碼', note: '夫人參與地區大嫂團眷聯會聚會', score: 20 },
+                { task: '服務計畫參與', note: '九合一扶輪日現場志工服務', score: 20 }
+            ]},
+            { name: 'AlanWen', team: 'Team 1 天狼星', stars: 85, details: [
+                { task: '聯誼常態例會', note: '常態例會出席與跨社Make-up', score: 45 },
+                { task: '服務計畫參與', note: '地區指標社會服務-公益捐血站志工', score: 20 },
+                { task: '形象提升推廣', note: '代表社內投稿地區短影音徵選', score: 20 }
+            ]},
+            { name: 'Fong', team: 'Team 2 織女星', stars: 80, details: [
+                { task: '聯誼常態例會', note: '常態例會親自出席優良', score: 40 },
+                { task: '寶眷榮耀加碼', note: '夫人出席與眷聯會共同例會', score: 20 },
+                { task: '服務計畫參與', note: '腹超計畫與地區服務活動參與', score: 20 }
+            ]},
+            { name: 'Leo', team: 'Team 3 北極星', stars: 80, details: [
+                { task: '聯誼常態例會', note: '例會與地區聯合首敲出席', score: 30 },
+                { task: '服務計畫參與', note: '擔任國際義診與跨地區服務志工', score: 30 },
+                { task: '寶眷榮耀加碼', note: '夫人共同出席移動例會', score: 20 }
+            ]},
+            { name: 'Hank', team: 'Team 2 織女星', stars: 75, details: [
+                { task: '聯誼常態例會', note: '每週例會出席穩定', score: 45 },
+                { task: '服務計畫參與', note: '九合一扶輪日系列活動志工', score: 30 }
+            ]},
+            { name: 'Lisa', team: 'Team 3 北極星', stars: 75, details: [
+                { task: '聯誼常態例會', note: '常態例會高出席率', score: 45 },
+                { task: '服務計畫參與', note: '公益登山活動與捐血服務志工', score: 30 }
+            ]},
+            { name: 'Avic', team: 'Team 1 天狼星', stars: 70, details: [
+                { task: '聯誼常態例會', note: '常態例會與分區聯合例會出席', score: 35 },
+                { task: '寶眷榮耀加碼', note: '夫人參加眷聯群組與聚會動員', score: 20 },
+                { task: '服務計畫參與', note: '地區服務活動人次配合', score: 15 }
+            ]},
+            { name: 'Aking', team: 'Team 1 天狼星', stars: 65, details: [
+                { task: '聯誼常態例會', note: '例會親自出席穩定', score: 30 },
+                { task: '寶眷榮耀加碼', note: '夫人共同出席節慶晚會', score: 20 },
+                { task: '服務計畫參與', note: '配合永續論壇與社內職業參訪', score: 15 }
+            ]},
+            { name: 'Ian', team: 'Team 2 織女星', stars: 95, details: [
+                { task: '聯誼常態例會', note: '每週例會親自簽到', score: 35 },
+                { task: '服務計畫參與', note: '九合一服務計畫志工成行', score: 30 }
+            ]},
+            { name: 'Stanley', team: 'Team 4 大熊星', stars: 65, details: [
+                { task: '聯誼常態例會', note: '常態例會出席全勤保持者', score: 30 },
+                { task: '寶眷榮耀加碼', note: '大嫂積極出席共同移動例會', score: 20 },
+                { task: '服務計畫參與', note: '惜食服務與餐費食材捐贈專案', score: 15 }
+            ]},
+            { name: 'Jay', team: 'Team 2 織女星', stars: 60, details: [
+                { task: '聯誼常態例會', note: '每週例會出席與簽到', score: 40 },
+                { task: '服務計畫參與', note: '地區山水鐵人/公益登山志工', score: 20 }
+            ]},
+            { name: 'Larry', team: 'Team 3 北極星', stars: 60, details: [
+                { task: '聯誼常態例會', note: '常態例會穩定出席', score: 25 },
+                { task: '寶眷榮耀加碼', note: '大嫂共同出席節慶晚宴', score: 20 },
+                { task: '服務計畫參與', note: '山水鐵人志工與城鄉交流支持', score: 15 }
+            ]},
+            { name: 'Calvin', team: 'Team 1 天狼星', stars: 55, details: [
+                { task: '聯誼常態例會', note: '例會親自出席與補出席', score: 20 },
+                { task: '寶眷榮耀加碼', note: '夫人積極出席眷聯聚會', score: 20 },
+                { task: '服務計畫參與', note: '生命橋樑計畫導師Mentor支持', score: 15 }
+            ]},
+            { name: 'Jason', team: 'Team 2 織女星', stars: 55, details: [
+                { task: '聯誼常態例會', note: '常態例會出席保持良好', score: 35 },
+                { task: '服務計畫參與', note: '地區職業參訪與永續論壇參與', score: 20 }
+            ]},
+            { name: 'Louis', team: 'Team 3 北極星', stars: 55, details: [
+                { task: '聯誼常態例會', note: '常態例會簽到率良好', score: 20 },
+                { task: '寶眷榮耀加碼', note: '大嫂出席與眷聯會共同例會', score: 20 },
+                { task: '服務計畫參與', note: '地區服務時數輸入與配合', score: 15 }
+            ]},
+            { name: 'Maria', team: 'Team 4 大熊星', stars: 55, details: [
+                { task: '聯誼常態例會', note: '每週例會穩定出勤', score: 35 },
+                { task: '服務計畫參與', note: '幸福樂生野餐嘉年華攤位贊助', score: 20 }
+            ]},
+            { name: 'Charles', team: 'Team 1 天狼星', stars: 50, details: [
+                { task: '聯誼常態例會', note: '常態例會全勤出席', score: 50 }
+            ]},
+            { name: 'James', team: 'Team 2 織女星', stars: 50, details: [
+                { task: '聯誼常態例會', note: '每週例會穩定出勤', score: 30 },
+                { task: '寶眷榮耀加碼', note: '大嫂出席眷聯聚會與討論', score: 20 }
+            ]},
+            { name: 'Liang', team: 'Team 3 北極星', stars: 50, details: [
+                { task: '聯誼常態例會', note: '常態例會出席正常', score: 15 },
+                { task: '寶眷榮耀加碼', note: '夫人積極出席移動例會', score: 20 },
+                { task: '服務計畫參與', note: '扶輪公益網媒合成功案例', score: 15 }
+            ]},
+            { name: 'Neo', team: 'Team 4 大熊星', stars: 88, details: [
+                { task: '聯誼常態例會', note: '每週例會親自簽到率高', score: 35 },
+                { task: '服務計畫參與', note: '急難救助配合人力與物資捐助', score: 15 }
+            ]},
+            { name: 'David', team: 'Team 1 天狼星', stars: 45, details: [
+                { task: '聯誼常態例會', note: '常態例會簽到', score: 25 },
+                { task: '寶眷榮耀加碼', note: '夫人出席與眷聯會共同例會', score: 20 }
+            ]},
+            { name: 'Michael', team: 'Team 3 北極星', stars: 45, details: [
+                { task: '聯誼常態例會', note: '例會與地區學習研討會出席', score: 30 },
+                { task: '服務計畫參與', note: 'K-POP創意舞蹈比賽推廣支持', score: 15 }
+            ]},
+            { name: 'Sunivy', team: 'Team 4 大熊星', stars: 45, details: [
+                { task: '聯誼常態例會', note: '每週例會出席正常', score: 25 },
+                { task: '寶眷榮耀加碼', note: '夫人出席眷聯會聚會動員', score: 20 }
+            ]},
+            { name: 'Kim', team: 'Team 2 織女星', stars: 40, details: [
+                { task: '聯誼常態例會', note: '常態例會出席正常', score: 20 },
+                { task: '寶眷榮耀加碼', note: '大嫂出席共同節慶晚會', score: 20 }
+            ]},
+            { name: 'Marine', team: 'Team 3 北極星', stars: 40, details: [
+                { task: '聯誼常態例會', note: '例會出席與簽到', score: 20 },
+                { task: '寶眷榮耀加碼', note: '大嫂出席與眷聯會共同例會', score: 20 }
+            ]},
+            { name: 'Sean', team: 'Team 4 大熊星', stars: 40, details: [
+                { task: '聯誼常態例會', note: '每週例會穩定出勤', score: 25 },
+                { task: '服務計畫參與', note: '符合七大焦點項目之服務推動', score: 15 }
+            ]},
+            { name: 'Michelle', team: 'Team 3 北極星', stars: 35, details: [
+                { task: '聯誼常態例會', note: '常態例會出席正常', score: 15 },
+                { task: '寶眷榮耀加碼', note: '夫人共同出席節慶晚宴', score: 20 }
+            ]},
+            { name: 'Vincent', team: 'Team 4 大熊星', stars: 30, details: [
+                { task: '聯誼常態例會', note: '例會簽到與補出席紀錄', score: 10 },
+                { task: '寶眷榮耀加碼', note: '大嫂積極出席移動例會', score: 20 }
+            ]},
+            { name: 'West', team: 'Team 4 大熊星', stars: 25, details: [
+                { task: '寶眷榮耀加碼', note: '夫人大力出席與眷聯會共同例會', score: 20 },
+                { task: '聯誼常態例會', note: '例會親自簽到紀錄', score: 5 }
+            ]},
+            { name: 'Rich', team: 'Team 3 北極星', stars: 20, details: [
+                { task: '寶眷榮耀加碼', note: '夫人出席地區眷聯聚會幫戰隊爭光', score: 20 }
+            ]},
+            { name: 'Melvin', team: 'Team 2 織女星', stars: 15, details: [
+                { task: '服務計畫參與', note: '社友完成 RLI 扶輪領導學院課程', score: 15 }
+            ]},
+            { name: 'Ivan', team: 'Team 1 天狼星', stars: 10, details: [
+                { task: '聯誼常態例會', note: '例會親自出席紀錄', score: 10 }
+            ]},
+            { name: 'Vivian', team: 'Team 4 大熊星', stars: 10, details: [
+                { task: '聯誼常態例會', note: '例會親自出席紀錄', score: 10 }
+            ]},
+            { name: 'Jennifer', team: 'Team 1 天狼星', stars: 5, details: [
+                { task: '聯誼常態例會', note: '例會補出席 Make-up 紀錄', score: 5 }
+            ]}
         ];
 
-        let isAscending = false;
+        let currentData = [...initialMembers];
 
-        // 渲染表格
+        // 完美修復：利用更精準的「社友英文姓名比對法」來渲染排行榜表格
         function renderTable(data) {
             const tbody = document.getElementById('leaderboardBody');
             tbody.innerHTML = '';
-            data.forEach((member, index) => {
+            
+            // 獨立出戰隊參賽名單
+            const activeCompetitors = data.filter(m => m.name !== 'Janice');
+            
+            activeCompetitors.forEach((member, index) => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50/80 transition-colors';
+                tr.className = 'hover:bg-slate-100 cursor-pointer transition-colors';
                 
-                // 前三名給予獎牌圖示
+                // 這裡改為直接傳遞「社友的名字字串」，徹底防範名次與陣列索引錯亂的 bug
+                tr.setAttribute('onclick', `openModal('${member.name}')`);
+                
                 let rankDisplay = index + 1;
                 if(index === 0) rankDisplay = '🥇';
                 if(index === 1) rankDisplay = '🥈';
@@ -198,7 +399,7 @@
 
                 tr.innerHTML = `
                     <td class="py-3 px-4 text-center font-bold text-slate-500">${rankDisplay}</td>
-                    <td class="py-3 px-4 font-bold text-slate-800">${member.name}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${member.name} <i class="fa-solid fa-circle-info text-slate-300 text-xs ml-1"></i></td>
                     <td class="py-3 px-4 text-slate-500 text-xs">${member.team}</td>
                     <td class="py-3 px-4 text-right font-black text-indigo-600">${member.stars} <span class="text-xs text-slate-400 font-normal">☆</span></td>
                 `;
@@ -206,23 +407,69 @@
             });
         }
 
-        // 排序功能
-        function sortTable() {
-            isAscending = !isAscending;
-            const sortedData = [...initialMembers].sort((a, b) => isAscending ? a.stars - b.stars : b.stars - a.stars);
-            renderTable(sortedData);
+        // 彈出視窗（對照全體資料庫，包含社長與過濾後的社友）
+        function openModal(memberName) {
+            const member = initialMembers.find(m => m.name === memberName);
+            if (!member) return;
+
+            document.getElementById('modalName').innerText = member.name;
+            document.getElementById('modalTeam').innerText = member.team;
+            document.getElementById('modalTotalStars').innerText = member.stars;
+
+            const listContainer = document.getElementById('modalDetailsList');
+            listContainer.innerHTML = '';
+
+            if (!member.details || member.details.length === 0) {
+                listContainer.innerHTML = `<p class="text-slate-400 text-center text-sm py-4">目前尚無細項登錄紀錄。</p>`;
+            } else {
+                member.details.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'flex justify-between items-start border-b border-slate-100 pb-3';
+                    itemDiv.innerHTML = `
+                        <div>
+                            <span class="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-sm">${item.task}</span>
+                            <p class="text-sm text-slate-700 font-semibold mt-1">${item.note}</p>
+                        </div>
+                        <div class="text-sm font-black text-slate-800 ml-4">+${item.score} ☆</div>
+                    `;
+                    listContainer.appendChild(itemDiv);
+                });
+            }
+
+            document.getElementById('detailsModal').classList.remove('hidden');
         }
 
-        // 搜尋篩選功能
+        function closeModal() {
+            document.getElementById('detailsModal').classList.add('hidden');
+        }
+
+        // 點擊視窗外部區域自動關閉視窗，優化使用者體驗
+        function closeModalOutside(event) {
+            if (event.target === document.getElementById('detailsModal')) {
+                closeModal();
+            }
+        }
+
+        // 排序
+        function sortTable() {
+            isAscending = !isAscending;
+            currentData.sort((a, b) => isAscending ? a.stars - b.stars : b.stars - a.stars);
+            renderTable(currentData);
+        }
+
+        // 搜尋
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const keyword = e.target.value.toLowerCase();
-            const filteredData = initialMembers.filter(member => member.name.toLowerCase().includes(keyword));
-            renderTable(filteredData);
+            currentData = initialMembers.filter(member => member.name.toLowerCase().includes(keyword));
+            renderTable(currentData);
         });
 
-        // 初始化：預設由高到低排序並顯示
-        const defaultSorted = [...initialMembers].sort((a, b) => b.stars - a.stars);
-        renderTable(defaultSorted);
+        // 初始化
+        window.onload = function() {
+            switchMonth('current');
+            currentData.sort((a, b) => b.stars - a.stars);
+            renderTable(currentData);
+        };
     </script>
 </body>
 </html>
