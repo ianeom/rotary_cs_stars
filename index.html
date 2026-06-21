@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rotary Star Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body {
+      font-family: "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background:
+        linear-gradient(180deg, rgba(12,35,64,.06), rgba(244,247,250,0) 280px),
+        #f4f7fa;
+    }
+    .rotary-blue { background: linear-gradient(135deg, #0c2340 0%, #173b66 72%, #8a704c 160%); }
+    .rotary-gold { color: #8a704c; }
+    .bg-rotary-gold { background: #8a704c; }
+    .section {
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(138,112,76,.16);
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(12,35,64,.08);
+    }
+    .metric-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e5e7eb;
+      box-shadow: inset 0 3px 0 rgba(138,112,76,.45);
+    }
+    .metric-card.clickable:hover {
+      border-color: rgba(138,112,76,.55);
+      background: linear-gradient(180deg, #fffaf0 0%, #ffffff 100%);
+    }
+    .gold-panel {
+      background: linear-gradient(135deg, #fff7e6 0%, #f8fafc 100%);
+      border: 1px solid rgba(138,112,76,.28);
+    }
+    .month-active {
+      background: #0c2340;
+      color: #fff;
+      border-color: #0c2340;
+      box-shadow: 0 5px 14px rgba(12,35,64,.18);
+    }
+    .month-idle {
+      background: #fff;
+      color: #475569;
+      border-color: #e5e7eb;
+    }
+    .month-idle:hover {
+      border-color: rgba(138,112,76,.45);
+      color: #0c2340;
+    }
+    .month-rail {
+      scrollbar-width: none;
+      scroll-snap-type: x proximity;
+    }
+    .month-rail::-webkit-scrollbar { display: none; }
+    .month-btn { scroll-snap-align: center; white-space: nowrap; }
+    .rail-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(138,112,76,.24);
+      background: #fff;
+      color: #8a704c;
+      box-shadow: 0 4px 12px rgba(12,35,64,.08);
+    }
+    .rail-btn:hover { background: #fff7e6; }
+    .showcase-rail {
+      scrollbar-width: none;
+      scroll-snap-type: x proximity;
+    }
+    .showcase-rail::-webkit-scrollbar { display: none; }
+    .showcase-card {
+      min-width: 240px;
+      scroll-snap-align: start;
+    }
+    .status-done { background: #dcfce7; color: #166534; }
+    .status-open { background: #fef3c7; color: #92400e; }
+    .status-planned { background: #f1f5f9; color: #475569; }
+  </style>
+</head>
+<body class="text-slate-800">
+  <nav class="rotary-blue text-white px-4 md:px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded bg-yellow-400/15 border border-yellow-400/30 flex items-center justify-center">
+          <i class="fa-solid fa-star text-yellow-400 text-2xl"></i>
+        </div>
+        <div>
+          <h1 id="siteTitle" class="text-xl md:text-2xl font-black"></h1>
+          <p id="siteSubtitle" class="text-xs text-slate-300"></p>
+        </div>
+      </div>
+      <div id="siteBadge" class="text-sm border border-yellow-500/40 bg-yellow-500/10 px-3 py-1 rounded text-yellow-300 font-semibold w-fit"></div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+    <section class="section p-5 md:p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-[1.15fr_.85fr] gap-6">
+        <div>
+          <p id="heroEyebrow" class="text-sm font-bold rotary-gold"></p>
+          <h2 id="heroTitle" class="text-3xl md:text-5xl font-black mt-2 leading-tight"></h2>
+          <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3" id="dashboardCards"></div>
+        </div>
+        <div class="gold-panel rounded-lg p-5">
+          <div class="flex justify-between items-end mb-2">
+            <div>
+              <p id="goalLabel" class="text-xs font-bold text-slate-500"></p>
+              <p class="text-2xl font-black"><span id="currentStars">0</span> / <span id="goalStars">0</span></p>
+            </div>
+            <p class="text-3xl font-black rotary-gold" id="progressRate">0%</p>
+          </div>
+          <div class="w-full h-4 bg-white border border-slate-200 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full" style="width:0%"></div>
+          </div>
+          <p id="goalNote" class="text-xs text-slate-500 mt-3"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section p-5 md:p-6">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-xl font-black flex items-center gap-2"><i class="fa-solid fa-calendar-check rotary-gold"></i><span id="mapTitle"></span></h2>
+          <p id="mapSubtitle" class="text-sm text-slate-500 mt-1"></p>
+        </div>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <button id="monthPrevBtn" class="rail-btn rounded flex items-center justify-center shrink-0" aria-label="previous month">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <div id="monthTabs" class="month-rail flex gap-2 overflow-x-auto max-w-full md:max-w-[560px] px-1 py-1"></div>
+          <button id="monthNextBtn" class="rail-btn rounded flex items-center justify-center shrink-0" aria-label="next month">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+      <div class="gold-panel rounded-lg mb-5 overflow-hidden">
+        <div id="monthShowcase" class="showcase-rail flex md:grid md:grid-cols-3 gap-3 overflow-x-auto p-3"></div>
+      </div>
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fa-solid fa-map-location-dot rotary-gold"></i>
+        <h3 id="mapDetailTitle" class="font-black"></h3>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-[.8fr_1.2fr] gap-5">
+        <div class="gold-panel rounded-lg p-5">
+          <p class="text-sm font-bold text-slate-500" id="selectedMonthLabel"></p>
+          <p class="text-4xl font-black mt-2"><span id="selectedMonthStars">0</span></p>
+          <p id="monthStarsLabel" class="text-sm text-slate-500 mt-2"></p>
+          <div class="mt-5 space-y-2 text-sm" id="selectedMonthSummary"></div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left min-w-[640px]">
+            <thead><tr id="mapHead" class="text-xs text-slate-500 border-b border-slate-200"></tr></thead>
+            <tbody id="starMapBody" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 gap-6">
+      <div class="section p-5 md:p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <h2 class="text-xl font-black flex items-center gap-2"><i class="fa-solid fa-ranking-star rotary-gold"></i><span id="rankTitle"></span></h2>
+          <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <button id="openAllMembersBtn" class="inline-flex items-center justify-center gap-2 rotary-blue text-white px-3 py-2 rounded text-sm font-bold hover:opacity-95 transition">
+              <i class="fa-solid fa-users"></i><span id="allMembersButtonText"></span>
+            </button>
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+              <input id="searchInput" type="text" class="pl-9 pr-4 py-2 border border-slate-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-64">
+            </div>
+          </div>
+        </div>
+        <div class="overflow-x-auto rounded border border-slate-100">
+          <table class="w-full text-left min-w-[560px]">
+            <thead><tr id="rankHead" class="bg-slate-50 text-slate-500 text-xs font-bold border-b border-slate-100"></tr></thead>
+            <tbody id="leaderboardBody" class="divide-y divide-slate-50 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="section p-5 md:p-6">
+        <div class="mb-4">
+          <div>
+            <h2 class="text-xl font-black flex items-center gap-2"><i class="fa-solid fa-book-open rotary-gold"></i><span id="rulesTitle"></span></h2>
+            <p id="rulesSummary" class="text-sm text-slate-500 mt-1"></p>
+          </div>
+        </div>
+        <div id="rulesList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="memberModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 p-4 items-center justify-center">
+    <div class="bg-white rounded-lg max-w-lg w-full shadow-2xl overflow-hidden">
+      <div class="rotary-blue p-5 text-white flex justify-between items-start">
+        <div><p class="text-xs text-yellow-300 font-bold" id="modalRole"></p><h3 id="modalName" class="text-2xl font-black mt-1"></h3></div>
+        <button id="closeModalBtn" class="text-white/70 hover:text-white text-xl" aria-label="close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-5">
+        <div class="grid grid-cols-3 gap-3 mb-5 text-center">
+          <div class="bg-slate-50 rounded p-3"><p id="modalStarsLabel" class="text-xs text-slate-500"></p><p class="text-xl font-black" id="modalStars"></p></div>
+          <div class="bg-slate-50 rounded p-3"><p id="modalMonthLabel" class="text-xs text-slate-500"></p><p class="text-xl font-black" id="modalMonthlyStars"></p></div>
+          <div class="bg-slate-50 rounded p-3"><p id="modalRankLabel" class="text-xs text-slate-500"></p><p class="text-xl font-black" id="modalRank"></p></div>
+        </div>
+        <h4 id="modalHistoryTitle" class="font-black mb-3"></h4>
+        <div id="modalHistory" class="space-y-3 max-h-72 overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="topThreeModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 p-4 items-center justify-center">
+    <div class="bg-white rounded-lg max-w-md w-full shadow-2xl overflow-hidden">
+      <div class="rotary-blue p-5 text-white flex justify-between items-start">
+        <div>
+          <p id="topThreeKicker" class="text-xs text-yellow-300 font-bold"></p>
+          <h3 id="topThreeTitle" class="text-2xl font-black mt-1"></h3>
+        </div>
+        <button id="closeTopThreeBtn" class="text-white/70 hover:text-white text-xl" aria-label="close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="topThreeList" class="p-5 space-y-3"></div>
+    </div>
+  </div>
+
+  <div id="allMembersModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 p-4 items-center justify-center">
+    <div class="bg-white rounded-lg max-w-4xl w-full shadow-2xl overflow-hidden">
+      <div class="rotary-blue p-5 text-white flex justify-between items-start">
+        <div>
+          <p id="allMembersKicker" class="text-xs text-yellow-300 font-bold"></p>
+          <h3 id="allMembersTitle" class="text-2xl font-black mt-1"></h3>
+        </div>
+        <button id="closeAllMembersBtn" class="text-white/70 hover:text-white text-xl" aria-label="close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="allMembersGrid" class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[70vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <footer id="footerText" class="text-center py-8 text-xs text-slate-400"></footer>
+
+  <script>
+    const t = {
+      subtitle: "\u5f15\u5c0e\u6bcf\u4f4d\u793e\u53cb\u77e5\u9053\u4e0b\u4e00\u9846\u661f\u5728\u54ea\u88e1",
+      badge: "\u5e74\u5ea6\u71df\u904b\u7ba1\u7406\u5e73\u53f0",
+      heroEyebrow: "\u5168\u54e1\u6458\u661f \u69ae\u8000\u4e2d\u5c71",
+      heroTitle: "\u5e74\u5ea6\u6458\u661f\u9032\u5ea6",
+      goalLabel: "\u5168\u793e\u5e74\u5ea6\u76ee\u6a19",
+      goalNote: "\u79d8\u66f8\u8655\u53ea\u8981\u66f4\u65b0\u8cc7\u6599\u6a94\uff0c\u524d\u53f0\u6703\u81ea\u52d5\u91cd\u7b97\u7e3d\u661f\u6578\u3001\u6392\u540d\u8207\u672c\u6708\u9032\u5ea6\u3002",
+      mapTitle: "\u6708\u5ea6\u6230\u6cc1\u8207\u6b77\u53f2\u5f97\u734e\u7246",
+      mapSubtitle: "\u4fdd\u7559\u6bcf\u6708\u7126\u9ede\u8207\u5f97\u734e\u8a18\u9304\uff0c\u4e26\u986f\u793a\u7576\u6708\u53ef\u6458\u7684\u661f\u661f\u5730\u5716\u3002",
+      rankTitle: "\u500b\u4eba\u6392\u884c\u699c",
+      rulesTitle: "\u6458\u661f\u898f\u5247\u624b\u518a",
+      stars: "\u661f",
+      totalStars: "\u5168\u793e\u7e3d\u661f\u6578",
+      monthKing: "\u672c\u6708\u6458\u661f\u738b",
+      yearKing: "\u5e74\u5ea6\u6458\u661f\u738b",
+      presidentValue: "\u793e\u9577\u8ca2\u737b\u503c",
+      availableStars: "\u672c\u6708\u53ef\u53d6\u5f97\u661f\u6578",
+      doneEvents: "\u5df2\u5b8c\u6210\u6d3b\u52d5",
+      openEvents: "\u53ef\u5831\u540d\u6d3b\u52d5",
+      allEvents: "\u5168\u90e8\u6d3b\u52d5",
+      date: "\u65e5\u671f",
+      activity: "\u6d3b\u52d5",
+      status: "\u72c0\u614b",
+      rank: "\u6392\u540d",
+      name: "\u59d3\u540d",
+      month: "\u672c\u6708",
+      yearStars: "\u5e74\u5ea6\u661f\u6578",
+      search: "\u641c\u5c0b\u793e\u54e1",
+      done: "\u5df2\u5b8c\u6210",
+      open: "\u53ef\u5831\u540d",
+      planned: "\u898f\u5283\u4e2d",
+      recentHistory: "\u6700\u8fd1\u6458\u661f\u5c65\u6b77",
+      topThree: "\u524d\u4e09\u540d",
+      clickForTopThree: "\u9ede\u64ca\u67e5\u770b\u524d\u4e09\u540d",
+      monthlyRank: "\u672c\u6708\u6392\u884c",
+      yearlyRank: "\u5e74\u5ea6\u6392\u884c"
+      ,
+      allMembers: "\u5168\u9ad4\u7e3d\u89bd",
+      allMembersStars: "\u5168\u9ad4\u793e\u53cb\u661f\u661f",
+      expandHint: "\u9ede\u64ca\u5c55\u958b",
+      closeDetail: "\u6536\u5408",
+      noHistory: "\u5c1a\u672a\u6709\u6458\u661f\u7d00\u9304",
+      allRules: "\u5168\u90e8\u898f\u5247",
+      ruleSearch: "\u641c\u5c0b\u898f\u5247\u3001\u9805\u6b21\u6216\u661f\u6578",
+      ruleCount: "\u689d\u898f\u5247",
+      ruleUnit: "\u8a08\u7b97\u55ae\u4f4d",
+      ruleNote: "\u8cc7\u683c\u8aaa\u660e",
+      galaxyMap: "\u53f0\u5317\u4e2d\u5c71\u6276\u8f2a\u793e\u6458\u661f\u4e03\u5927\u661f\u7cfb\u5730\u5716",
+      missionGoal: "\u76ee\u6a19",
+      availableTasks: "\u53ef\u6458\u661f\u4efb\u52d9",
+      taskCount: "\u500b\u4efb\u52d9",
+      spouse: "\u5bf6(\u5c0a)\u7737",
+      monthFocus: "\u6708\u5ea6\u7126\u9ede",
+      monthlyMvp: "\u6708\u5ea6\u6458\u661f\u738b",
+      monthlyReview: "\u6230\u6cc1\u56de\u9867",
+      mapDetail: "\u6458\u661f\u5730\u5716\u660e\u7d30",
+      completedProgress: "\u5df2\u5b8c\u6210",
+      openProgress: "\u53ef\u53c3\u52a0",
+      noMonthlyRecord: "\u5f85\u88dc\u7d00\u9304",
+      notStarted: "\u672c\u6708\u4efb\u52d9\u5c1a\u672a\u958b\u59cb"
+    };
+
+    let appData = { club: { name: "", year: "", title: "", goalStars: 0, currentMonth: "" }, members: [], starMap: [], rules: [] };
+    let selectedMonth = "";
+    let expandedMember = "";
+
+    const googleSheet = {
+      id: "167BBJdlNlOXLwFeudMwI_74680hfCHax",
+      membersGid: "135569316",
+      starMapGid: "1946869433",
+      recordsGid: "1334576869"
+    };
+
+    const sheetColumns = {
+      name: "\u59d3\u540d",
+      spouse: "\u5bf6(\u5c0a)\u7737",
+      role: "\u8eab\u4efd",
+      status: "\u72c0\u614b",
+      note: "\u5099\u8a3b",
+      month: "\u6708\u4efd",
+      date: "\u65e5\u671f",
+      activity: "\u6d3b\u52d5",
+      stars: "\u661f\u6578",
+      signupUrl: "\u5831\u540d\u9023\u7d50"
+    };
+
+    const sheetUrl = (gid) => `https://docs.google.com/spreadsheets/d/${googleSheet.id}/export?format=csv&gid=${gid}`;
+
+    const fmt = (dateText) => {
+      const d = new Date(`${dateText}T00:00:00`);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
+    };
+
+    function monthLabel(monthKey) {
+      const date = new Date(`${monthKey}-01T00:00:00`);
+      return `${date.getMonth() + 1}\u6708`;
+    }
+
+    function memberMonthStars(member, monthKey = appData.club.currentMonth) {
+      return (member.history || [])
+        .filter((item) => item.date && item.date.startsWith(monthKey))
+        .reduce((sum, item) => sum + Number(item.stars || 0), 0);
+    }
+
+    async function loadData() {
+      const fallback = await loadFallbackData();
+      appData = await loadGoogleSheetData(fallback);
+      selectedMonth = appData.club.currentMonth || (appData.starMap[0] ? appData.starMap[0].month : "");
+      renderStaticText();
+      renderAll();
+    }
+
+    async function loadFallbackData() {
+      const res = await fetch("data/site-data.json", { cache: "no-store" });
+      return await res.json();
+    }
+
+    async function loadGoogleSheetData(fallback) {
+      try {
+        const [membersCsv, starMapCsv, recordsCsv] = await Promise.all([
+          fetchText(sheetUrl(googleSheet.membersGid)),
+          fetchText(sheetUrl(googleSheet.starMapGid)),
+          fetchText(sheetUrl(googleSheet.recordsGid))
+        ]);
+
+        const members = buildMembers(parseCsv(membersCsv), parseCsv(recordsCsv));
+        const starMap = buildStarMap(parseCsv(starMapCsv));
+
+        return {
+          club: {
+            ...fallback.club,
+            currentMonth: fallback.club.currentMonth && starMap.some((month) => month.month === fallback.club.currentMonth)
+              ? fallback.club.currentMonth
+              : (starMap[0] ? starMap[0].month : fallback.club.currentMonth)
+          },
+          members: members.length ? members : fallback.members,
+          starMap: starMap.length ? starMap : fallback.starMap,
+          rules: fallback.rules
+        };
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    async function fetchText(url) {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`Unable to load ${url}`);
+      return await res.text();
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let quoted = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && quoted && next === '"') {
+          cell += '"';
+          i += 1;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (char === "," && !quoted) {
+          row.push(cell);
+          cell = "";
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+          if (char === "\r" && next === "\n") i += 1;
+          row.push(cell);
+          if (row.some((value) => value.trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+
+      row.push(cell);
+      if (row.some((value) => value.trim() !== "")) rows.push(row);
+      if (!rows.length) return [];
+
+      const headers = rows[0].map((header) => header.trim());
+      return rows.slice(1).map((values) => {
+        const item = {};
+        headers.forEach((header, index) => {
+          item[header] = (values[index] || "").trim();
+        });
+        return item;
+      });
+    }
+
+    function buildMembers(memberRows, recordRows) {
+      const records = new Map();
+
+      recordRows.forEach((row) => {
+        if (!row[sheetColumns.name]) return;
+        const key = memberKey(row[sheetColumns.name]);
+        const item = {
+          date: parseSheetDate(row[sheetColumns.date]),
+          activity: row[sheetColumns.activity] || "",
+          stars: parseSheetNumber(row[sheetColumns.stars]),
+          note: row[sheetColumns.note] || ""
+        };
+        if (!records.has(key)) records.set(key, []);
+        records.get(key).push(item);
+      });
+
+      return memberRows.filter((row) => row[sheetColumns.name]).map((row) => {
+        const history = (records.get(memberKey(row[sheetColumns.name])) || []).sort((a, b) => a.date.localeCompare(b.date));
+        return {
+          name: row[sheetColumns.name],
+          role: row[sheetColumns.role] || "\u793e\u53cb",
+          status: row[sheetColumns.status] || "\u555f\u7528",
+          spouse: row[sheetColumns.spouse] || "",
+          note: row[sheetColumns.note] || "",
+          stars: history.reduce((sum, item) => sum + item.stars, 0),
+          monthlyStars: 0,
+          history
+        };
+      });
+    }
+
+    function buildStarMap(rows) {
+      const months = new Map();
+
+      rows.forEach((row) => {
+        if (!row[sheetColumns.month] || !row[sheetColumns.activity]) return;
+        const parsedMonth = parseSheetMonth(row[sheetColumns.month]);
+        if (!parsedMonth) return;
+
+        if (!months.has(parsedMonth.month)) {
+          months.set(parsedMonth.month, { month: parsedMonth.month, label: parsedMonth.label, events: [] });
+        }
+
+        months.get(parsedMonth.month).events.push({
+          date: parseSheetDate(row[sheetColumns.date], parsedMonth.month),
+          name: row[sheetColumns.activity],
+          stars: parseSheetNumber(row[sheetColumns.stars]),
+          status: parseSheetStatus(row[sheetColumns.status]),
+          signupUrl: row[sheetColumns.signupUrl] || ""
+        });
+      });
+
+      return [...months.values()].sort((a, b) => a.month.localeCompare(b.month));
+    }
+
+    function memberKey(name) {
+      return String(name || "").replace(/\s/g, "").toLowerCase();
+    }
+
+    function parseSheetNumber(value) {
+      const match = String(value || "").match(/\d+/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function parseSheetMonth(value) {
+      const match = String(value || "").match(/(\d{4})\D+(\d{1,2})/);
+      if (!match) return null;
+      const year = Number(match[1]);
+      const month = Number(match[2]);
+      return { month: `${year}-${String(month).padStart(2, "0")}`, label: `${year}\u5e74${month}\u6708` };
+    }
+
+    function parseSheetDate(value, monthKey = "") {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      const full = text.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+      if (full) return `${full[1]}-${String(full[2]).padStart(2, "0")}-${String(full[3]).padStart(2, "0")}`;
+      const short = text.match(/(\d{1,2})\D+(\d{1,2})/);
+      if (short && monthKey) return `${monthKey.split("-")[0]}-${String(short[1]).padStart(2, "0")}-${String(short[2]).padStart(2, "0")}`;
+      return text;
+    }
+
+    function parseSheetStatus(value) {
+      const text = String(value || "").trim();
+      if (text === "\u5df2\u5b8c\u6210" || text === "done") return "done";
+      if (text === "\u53ef\u53c3\u52a0" || text === "\u53ef\u5831\u540d" || text === "open") return "open";
+      return "planned";
+    }
+
+    function rankedMembers() {
+      return activeMembers().sort((a, b) => b.stars - a.stars);
+    }
+
+    function activeMembers() {
+      return [...appData.members].filter((member) => member.status !== "\u505c\u7528");
+    }
+
+    function renderStaticText() {
+      document.title = `${appData.club.name} ${appData.club.year}${appData.club.title}`;
+      siteTitle.textContent = `${appData.club.name} ${appData.club.title}`;
+      siteSubtitle.textContent = t.subtitle;
+      siteBadge.textContent = `${appData.club.year} ${t.badge}`;
+      heroEyebrow.textContent = t.heroEyebrow;
+      heroTitle.textContent = t.heroTitle;
+      goalLabel.textContent = t.goalLabel;
+      goalNote.textContent = t.goalNote;
+      mapTitle.textContent = t.mapTitle;
+      mapSubtitle.textContent = t.mapSubtitle;
+      mapDetailTitle.textContent = t.mapDetail;
+      rankTitle.textContent = t.rankTitle;
+      rulesTitle.textContent = t.rulesTitle;
+      monthStarsLabel.textContent = t.availableStars;
+      searchInput.placeholder = t.search;
+      allMembersButtonText.textContent = t.allMembers;
+      modalStarsLabel.textContent = t.yearStars;
+      modalMonthLabel.textContent = monthLabel(appData.club.currentMonth);
+      modalRankLabel.textContent = t.rank;
+      modalHistoryTitle.textContent = t.recentHistory;
+      footerText.textContent = `${appData.club.name} ${appData.club.year} ${appData.club.title}`;
+      mapHead.innerHTML = [t.date, t.activity, t.stars, t.status].map((x, i) => `<th class="py-3 px-3 ${i === 2 ? "text-right" : i === 3 ? "text-center" : ""}">${x}</th>`).join("");
+      renderRankHead();
+    }
+
+    function renderAll() {
+      renderDashboard();
+      renderMonthTabs();
+      renderStarMap();
+      renderLeaderboard();
+      renderRules();
+    }
+
+    function renderDashboard() {
+      const ranked = rankedMembers();
+      const members = activeMembers();
+      const total = members.reduce((sum, m) => sum + m.stars, 0);
+      const currentMonth = appData.club.currentMonth;
+      const currentMonthLabel = monthLabel(currentMonth);
+      const monthWinner = members
+        .map((member) => ({ ...member, currentMonthStars: memberMonthStars(member, currentMonth) }))
+        .sort((a, b) => b.currentMonthStars - a.currentMonthStars)[0];
+      const president = members.find((m) => m.role === "\u793e\u9577");
+      const rate = appData.club.goalStars ? Math.min(Math.round(total / appData.club.goalStars * 100), 100) : 0;
+      currentStars.textContent = `${total.toLocaleString()} ${t.stars}`;
+      goalStars.textContent = `${appData.club.goalStars.toLocaleString()} ${t.stars}`;
+      progressRate.textContent = `${rate}%`;
+      progressBar.style.width = `${rate}%`;
+      dashboardCards.innerHTML = [
+        { label: t.totalStars, value: `${total.toLocaleString()} ${t.stars}`, icon: "fa-star" },
+        { label: `${t.monthKing}(${currentMonthLabel})`, value: monthWinner && monthWinner.currentMonthStars > 0 ? monthWinner.name : "-", icon: "fa-bolt", rankType: "monthly" },
+        { label: t.yearKing, value: ranked[0] ? ranked[0].name : "-", icon: "fa-crown", rankType: "yearly" },
+        { label: t.presidentValue, value: president ? `${president.stars} ${t.stars}` : "-", icon: "fa-user-tie" }
+      ].map((card) => `
+        <button class="text-left metric-card rounded p-4 ${card.rankType ? "clickable transition cursor-pointer" : ""}" ${card.rankType ? `data-rank-type="${card.rankType}"` : ""}>
+          <i class="fa-solid ${card.icon} rotary-gold"></i>
+          <p class="text-xs text-slate-500 mt-3">${card.label}</p>
+          <p class="text-xl font-black mt-1">${card.value}</p>
+          ${card.rankType ? `<p class="text-[11px] rotary-gold font-bold mt-2">${t.clickForTopThree}</p>` : ""}
+        </button>
+      `).join("");
+      document.querySelectorAll("[data-rank-type]").forEach((card) => card.addEventListener("click", () => openTopThreeModal(card.dataset.rankType)));
+    }
+
+    function renderMonthTabs() {
+      monthTabs.innerHTML = appData.starMap.map((m) => `<button class="month-btn px-3 py-2 rounded border text-sm font-bold ${m.month === selectedMonth ? "month-active" : "month-idle"}" data-month="${m.month}">${m.label}</button>`).join("");
+      document.querySelectorAll(".month-btn").forEach((btn) => btn.addEventListener("click", () => {
+        selectedMonth = btn.dataset.month;
+        renderMonthTabs();
+        renderStarMap();
+        renderRankHead();
+        renderLeaderboard();
+        requestAnimationFrame(() => btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }));
+      }));
+      requestAnimationFrame(() => {
+        document.querySelector(`[data-month="${selectedMonth}"]`)?.scrollIntoView({ inline: "center", block: "nearest" });
+      });
+    }
+
+    function renderStarMap() {
+      const month = appData.starMap.find((m) => m.month === selectedMonth) || appData.starMap[0];
+      if (!month) return;
+      const total = month.events.reduce((sum, e) => sum + e.stars, 0);
+      const done = month.events.filter((e) => e.status === "done").length;
+      const open = month.events.filter((e) => e.status === "open").length;
+      const reviewText = done === 0 && open === 0
+        ? t.notStarted
+        : `${t.completedProgress} ${done} / ${month.events.length} ${t.allEvents}<span class="mx-1">/</span>${t.openProgress} ${open} ${t.allEvents}`;
+      const memberTotals = activeMembers().map((member) => ({
+        name: member.name,
+        stars: (member.history || []).filter((item) => item.date && item.date.startsWith(month.month)).reduce((sum, item) => sum + item.stars, 0)
+      })).filter((member) => member.stars > 0).sort((a, b) => b.stars - a.stars);
+      const mvp = memberTotals[0];
+      monthShowcase.innerHTML = `
+        <div class="showcase-card bg-white border border-amber-100 rounded p-3 flex items-center gap-3">
+          <div class="w-9 h-9 rounded bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] text-slate-500 font-black truncate">${month.label} ${t.monthFocus}</p>
+            <p class="text-lg font-black rotary-gold leading-tight">${total} ${t.stars}</p>
+          </div>
+        </div>
+        <div class="showcase-card bg-white border border-amber-100 rounded p-3 flex items-center gap-3">
+          <div class="w-9 h-9 rounded bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-medal"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] text-slate-500 font-black truncate">${month.label} ${t.monthlyMvp}</p>
+            <p class="text-lg font-black leading-tight truncate">${mvp ? `${mvp.name} ${mvp.stars} ${t.stars}` : t.noMonthlyRecord}</p>
+          </div>
+        </div>
+        <div class="showcase-card bg-white border border-amber-100 rounded p-3 flex items-center gap-3">
+          <div class="w-9 h-9 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] text-slate-500 font-black truncate">${t.monthlyReview}</p>
+            <p class="text-sm font-bold text-slate-700 leading-tight">${reviewText}</p>
+          </div>
+        </div>
+      `;
+      selectedMonthLabel.textContent = month.label;
+      selectedMonthStars.textContent = `${total} ${t.stars}`;
+      selectedMonthSummary.innerHTML = [[t.doneEvents, done], [t.openEvents, open], [t.allEvents, month.events.length]].map((row) => `<div class="flex justify-between"><span>${row[0]}</span><strong>${row[1]}</strong></div>`).join("");
+      starMapBody.innerHTML = month.events.map((e) => `<tr><td class="py-3 px-3 font-bold">${fmt(e.date)}</td><td class="py-3 px-3">${e.name}</td><td class="py-3 px-3 text-right font-black rotary-gold">${e.stars}</td><td class="py-3 px-3 text-center"><span class="status-${e.status} text-xs font-bold px-2 py-1 rounded">${t[e.status]}</span></td></tr>`).join("");
+    }
+
+    function renderLeaderboard() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const ranked = rankedMembers();
+      const filtered = ranked.filter((m) => m.name.toLowerCase().includes(keyword));
+      leaderboardBody.innerHTML = filtered.map((m) => {
+        const rank = ranked.findIndex((x) => x.name === m.name) + 1;
+        const isExpanded = expandedMember === m.name;
+        const history = m.history && m.history.length ? m.history.map((h) => `<div class="flex justify-between gap-3 py-2 border-b border-slate-100 last:border-0"><span><strong>${fmt(h.date)}</strong> ${h.activity}</span><span class="font-black rotary-gold">+${h.stars} ${t.stars}</span></div>`).join("") : `<p class="text-slate-500">${t.noHistory}</p>`;
+        return `
+          <tr class="hover:bg-slate-50 cursor-pointer" data-member="${m.name}">
+            <td class="py-3 px-4 text-center font-black text-slate-500">${rank}</td>
+            <td class="py-3 px-4 font-bold">${m.name}<span class="text-xs text-slate-400 ml-2">${m.role}</span><span class="block text-[11px] rotary-gold mt-1">${isExpanded ? t.closeDetail : t.expandHint}</span></td>
+            <td class="py-3 px-4 text-slate-600">${memberMonthStars(m, selectedMonth)} ${t.stars}</td>
+            <td class="py-3 px-4 text-right font-black rotary-gold">${m.stars} ${t.stars}</td>
+          </tr>
+          ${isExpanded ? `<tr><td colspan="4" class="bg-amber-50/70 px-4 py-4"><div class="grid grid-cols-1 md:grid-cols-[.7fr_1.3fr] gap-4"><div class="bg-white border border-amber-100 rounded p-4"><p class="text-xs text-slate-500">${t.yearStars}</p><p class="text-3xl font-black rotary-gold">${m.stars} ${t.stars}</p><p class="text-xs text-slate-500 mt-3">${monthLabel(selectedMonth)}</p><p class="text-xl font-black">${memberMonthStars(m, selectedMonth)} ${t.stars}</p>${m.spouse ? `<p class="text-xs text-slate-500 mt-3">${t.spouse}</p><p class="font-bold">${m.spouse}</p>` : ""}</div><div class="bg-white border border-amber-100 rounded p-4"><p class="font-black mb-2">${t.recentHistory}</p>${history}</div></div></td></tr>` : ""}
+        `;
+      }).join("");
+      document.querySelectorAll("[data-member]").forEach((row) => row.addEventListener("click", () => {
+        expandedMember = expandedMember === row.dataset.member ? "" : row.dataset.member;
+        renderLeaderboard();
+      }));
+    }
+
+    function renderRankHead() {
+      rankHead.innerHTML = [t.rank, t.name, monthLabel(selectedMonth || appData.club.currentMonth), t.yearStars].map((x, i) => `<th class="py-3 px-4 ${i === 0 ? "text-center" : i === 3 ? "text-right" : ""}">${x}</th>`).join("");
+    }
+
+    function renderRules() {
+      rulesSummary.textContent = t.galaxyMap;
+      rulesList.innerHTML = appData.rules.map((rule, index) => {
+        const icon = rule.icon || "star";
+        const tasks = (rule.tasks || []).map((task) => `<li class="flex gap-2"><i class="fa-solid fa-star text-[10px] rotary-gold mt-1.5"></i><span>${task}</span></li>`).join("");
+        return `<article class="bg-slate-50 border border-amber-100 rounded p-4">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-${icon}"></i>
+              </div>
+              <div class="min-w-0">
+                <h3 class="font-black text-slate-800 leading-snug">${rule.title}</h3>
+                <p class="text-xs text-slate-500 mt-1">${(rule.tasks || []).length} ${t.taskCount}</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 bg-white border border-amber-100 rounded p-3">
+            <p class="text-xs font-black rotary-gold">${t.missionGoal}</p>
+            <p class="text-sm font-bold mt-1">${rule.goal}</p>
+          </div>
+          <div class="mt-4">
+            <p class="text-xs font-black text-slate-500 mb-2">${t.availableTasks}</p>
+            <ul class="space-y-1.5 text-sm text-slate-700">${tasks}</ul>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function openMemberModal(name) {
+      const ranked = rankedMembers();
+      const m = ranked.find((x) => x.name === name);
+      if (!m) return;
+      modalName.textContent = m.name;
+      modalRole.textContent = m.role;
+      modalStars.textContent = m.stars;
+      modalMonthlyStars.textContent = memberMonthStars(m);
+      modalRank.textContent = ranked.findIndex((x) => x.name === m.name) + 1;
+      modalHistory.innerHTML = m.history.map((h) => `<div class="flex justify-between gap-4 border-b border-slate-100 pb-3"><div><p class="text-xs text-slate-500">${fmt(h.date)}</p><p class="font-bold">${h.activity}</p></div><p class="font-black rotary-gold">+${h.stars} ${t.stars}</p></div>`).join("");
+      memberModal.classList.remove("hidden");
+      memberModal.classList.add("flex");
+    }
+
+    function openTopThreeModal(type) {
+      const isMonthly = type === "monthly";
+      const list = activeMembers().sort((a, b) => isMonthly ? memberMonthStars(b) - memberMonthStars(a) : b.stars - a.stars).slice(0, 3);
+      topThreeKicker.textContent = t.topThree;
+      topThreeTitle.textContent = isMonthly ? `${t.monthlyRank}(${monthLabel(appData.club.currentMonth)})` : t.yearlyRank;
+      topThreeList.innerHTML = list.map((member, index) => {
+        const score = isMonthly ? memberMonthStars(member) : member.stars;
+        return `<button class="w-full flex items-center justify-between gap-4 border border-amber-100 rounded p-4 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition text-left" data-top-member="${member.name}">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-rotary-gold text-white font-black flex items-center justify-center">${index + 1}</div>
+            <div>
+              <p class="font-black">${member.name}</p>
+              <p class="text-xs text-slate-500">${member.role}</p>
+            </div>
+          </div>
+          <p class="font-black rotary-gold">${score} ${t.stars}</p>
+        </button>`;
+      }).join("");
+      document.querySelectorAll("[data-top-member]").forEach((row) => row.addEventListener("click", () => {
+        closeTopThreeModal();
+        openMemberModal(row.dataset.topMember);
+      }));
+      topThreeModal.classList.remove("hidden");
+      topThreeModal.classList.add("flex");
+    }
+
+    function closeMemberModal() {
+      memberModal.classList.add("hidden");
+      memberModal.classList.remove("flex");
+    }
+
+    function closeTopThreeModal() {
+      topThreeModal.classList.add("hidden");
+      topThreeModal.classList.remove("flex");
+    }
+
+    function openAllMembersModal() {
+      const ranked = rankedMembers();
+      allMembersKicker.textContent = t.allMembers;
+      allMembersTitle.textContent = t.allMembersStars;
+      allMembersGrid.innerHTML = ranked.map((m, index) => `<button class="text-left border border-amber-100 rounded p-4 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition" data-all-member="${m.name}">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs text-slate-500">#${index + 1} ${m.role}</p>
+            <p class="text-lg font-black mt-1">${m.name}</p>
+            ${m.spouse ? `<p class="text-xs text-slate-500 mt-1">${t.spouse} ${m.spouse}</p>` : ""}
+          </div>
+          <i class="fa-solid fa-star text-yellow-500"></i>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+          <div class="bg-white border border-slate-100 rounded p-2"><p class="text-xs text-slate-500">${t.yearStars}</p><p class="font-black rotary-gold">${m.stars}</p></div>
+          <div class="bg-white border border-slate-100 rounded p-2"><p class="text-xs text-slate-500">${monthLabel(selectedMonth)}</p><p class="font-black">${memberMonthStars(m, selectedMonth)}</p></div>
+        </div>
+      </button>`).join("");
+      document.querySelectorAll("[data-all-member]").forEach((row) => row.addEventListener("click", () => {
+        closeAllMembersModal();
+        expandedMember = row.dataset.allMember;
+        renderLeaderboard();
+        document.querySelector(`[data-member="${CSS.escape(expandedMember)}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }));
+      allMembersModal.classList.remove("hidden");
+      allMembersModal.classList.add("flex");
+    }
+
+    function closeAllMembersModal() {
+      allMembersModal.classList.add("hidden");
+      allMembersModal.classList.remove("flex");
+    }
+
+    searchInput.addEventListener("input", renderLeaderboard);
+    monthPrevBtn.addEventListener("click", () => monthTabs.scrollBy({ left: -240, behavior: "smooth" }));
+    monthNextBtn.addEventListener("click", () => monthTabs.scrollBy({ left: 240, behavior: "smooth" }));
+    openAllMembersBtn.addEventListener("click", openAllMembersModal);
+    closeModalBtn.addEventListener("click", closeMemberModal);
+    closeTopThreeBtn.addEventListener("click", closeTopThreeModal);
+    closeAllMembersBtn.addEventListener("click", closeAllMembersModal);
+    memberModal.addEventListener("click", (event) => { if (event.target.id === "memberModal") closeMemberModal(); });
+    topThreeModal.addEventListener("click", (event) => { if (event.target.id === "topThreeModal") closeTopThreeModal(); });
+    allMembersModal.addEventListener("click", (event) => { if (event.target.id === "allMembersModal") closeAllMembersModal(); });
+    loadData();
+  </script>
+</body>
+</html>
