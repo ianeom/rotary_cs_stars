@@ -101,7 +101,7 @@
         <div>
           <p id="heroEyebrow" class="text-sm font-bold rotary-gold"></p>
           <h2 id="heroTitle" class="text-3xl md:text-5xl font-black mt-2 leading-tight"></h2>
-          <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3" id="dashboardCards"></div>
+          <div class="mt-6 grid grid-cols-2 lg:grid-cols-5 gap-3" id="dashboardCards"></div>
         </div>
         <div class="gold-panel rounded-lg p-5">
           <div class="flex justify-between items-end mb-2">
@@ -255,6 +255,7 @@
       monthKing: "\u672c\u6708\u6458\u661f\u738b",
       yearKing: "\u5e74\u5ea6\u6458\u661f\u738b",
       presidentValue: "\u793e\u9577\u8ca2\u737b\u503c",
+      coupleAward: "\u795e\u4ed9\u7737\u4fb6\u734e",
       availableStars: "\u672c\u6708\u53ef\u53d6\u5f97\u661f\u6578",
       doneEvents: "\u5df2\u5b8c\u6210\u6d3b\u52d5",
       openEvents: "\u53ef\u5831\u540d\u6d3b\u52d5",
@@ -364,6 +365,12 @@
         .reduce((sum, item) => sum + Number(item.stars || 0), 0);
     }
 
+    function memberCoupleStars(member) {
+      return (member.history || [])
+        .filter((item) => String(item.note || "").includes("\u795e\u4ed9\u7737\u4fb6"))
+        .reduce((sum, item) => sum + Number(item.stars || 0), 0);
+    }
+
     async function loadData() {
       const fallback = await loadFallbackData();
       appData = await loadGoogleSheetData(fallback);
@@ -470,11 +477,12 @@
       recordRows.forEach((row) => {
         if (!row[sheetColumns.name]) return;
         const key = memberKey(row[sheetColumns.name]);
+        const recordStars = parseRecordStars(row);
         const item = {
           date: parseSheetDate(row[sheetColumns.date]),
           activity: row[sheetColumns.activity] || "",
-          stars: parseSheetNumber(row[sheetColumns.stars]),
-          note: row[sheetColumns.note] || ""
+          stars: recordStars,
+          note: parseRecordNote(row)
         };
         if (!records.has(key)) records.set(key, []);
         records.get(key).push(item);
@@ -526,6 +534,18 @@
     function parseSheetNumber(value) {
       const match = String(value || "").match(/\d+/);
       return match ? Number(match[0]) : 0;
+    }
+
+    function parseRecordStars(row) {
+      const direct = parseSheetNumber(row[sheetColumns.stars]);
+      if (direct > 0) return direct;
+      return parseSheetNumber(row["\u661f\u7cfb"]);
+    }
+
+    function parseRecordNote(row) {
+      const note = row[sheetColumns.note] || "";
+      const starsText = row[sheetColumns.stars] || "";
+      return note || (parseSheetNumber(starsText) > 0 ? "" : starsText);
     }
 
     function parseSheetMonth(value) {
@@ -604,6 +624,9 @@
       const monthWinner = members
         .map((member) => ({ ...member, currentMonthStars: memberMonthStars(member, currentMonth) }))
         .sort((a, b) => b.currentMonthStars - a.currentMonthStars)[0];
+      const coupleWinner = members
+        .map((member) => ({ ...member, coupleStars: memberCoupleStars(member) }))
+        .sort((a, b) => b.coupleStars - a.coupleStars)[0];
       const president = members.find((m) => m.role === "\u793e\u9577");
       const rate = appData.club.goalStars ? Math.min(Math.round(total / appData.club.goalStars * 100), 100) : 0;
       currentStars.textContent = `${total.toLocaleString()} ${t.stars}`;
@@ -614,6 +637,7 @@
         { label: t.totalStars, value: `${total.toLocaleString()} ${t.stars}`, icon: "fa-star" },
         { label: `${t.monthKing}(${currentMonthLabel})`, value: monthWinner && monthWinner.currentMonthStars > 0 ? monthWinner.name : "-", icon: "fa-bolt", rankType: "monthly" },
         { label: t.yearKing, value: ranked[0] ? ranked[0].name : "-", icon: "fa-crown", rankType: "yearly" },
+        { label: t.coupleAward, value: coupleWinner && coupleWinner.coupleStars > 0 ? coupleWinner.name : "-", icon: "fa-heart", rankType: "couple" },
         { label: t.presidentValue, value: president ? `${president.stars} ${t.stars}` : "-", icon: "fa-user-tie" }
       ].map((card) => `
         <button class="text-left metric-card rounded p-4 ${card.rankType ? "clickable transition cursor-pointer" : ""}" ${card.rankType ? `data-rank-type="${card.rankType}"` : ""}>
@@ -763,11 +787,16 @@
 
     function openTopThreeModal(type) {
       const isMonthly = type === "monthly";
-      const list = activeMembers().sort((a, b) => isMonthly ? memberMonthStars(b) - memberMonthStars(a) : b.stars - a.stars).slice(0, 3);
+      const isCouple = type === "couple";
+      const list = activeMembers().sort((a, b) => {
+        if (isMonthly) return memberMonthStars(b) - memberMonthStars(a);
+        if (isCouple) return memberCoupleStars(b) - memberCoupleStars(a);
+        return b.stars - a.stars;
+      }).slice(0, 3);
       topThreeKicker.textContent = t.topThree;
-      topThreeTitle.textContent = isMonthly ? `${t.monthlyRank}(${monthLabel(appData.club.currentMonth)})` : t.yearlyRank;
+      topThreeTitle.textContent = isMonthly ? `${t.monthlyRank}(${monthLabel(appData.club.currentMonth)})` : isCouple ? t.coupleAward : t.yearlyRank;
       topThreeList.innerHTML = list.map((member, index) => {
-        const score = isMonthly ? memberMonthStars(member) : member.stars;
+        const score = isMonthly ? memberMonthStars(member) : isCouple ? memberCoupleStars(member) : member.stars;
         return `<button class="w-full flex items-center justify-between gap-4 border border-amber-100 rounded p-4 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition text-left" data-top-member="${member.name}">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded bg-rotary-gold text-white font-black flex items-center justify-center">${index + 1}</div>
