@@ -788,18 +788,25 @@
     function openTopThreeModal(type) {
       const isMonthly = type === "monthly";
       const isCouple = type === "couple";
-      const list = activeMembers().sort((a, b) => {
-        if (isMonthly) return memberMonthStars(b) - memberMonthStars(a);
-        if (isCouple) return memberCoupleStars(b) - memberCoupleStars(a);
-        return b.stars - a.stars;
-      }).slice(0, 3);
+      const ranked = activeMembers()
+        .map((member) => ({
+          member,
+          score: isMonthly ? memberMonthStars(member) : isCouple ? memberCoupleStars(member) : member.stars
+        }))
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score);
+      const thirdScore = ranked[2] ? ranked[2].score : (ranked[ranked.length - 1] ? ranked[ranked.length - 1].score : 0);
+      const list = ranked.filter((item, index) => index < 3 || item.score === thirdScore);
+      const displayRank = (index) => {
+        const score = list[index].score;
+        return list.findIndex((item) => item.score === score) + 1;
+      };
       topThreeKicker.textContent = t.topThree;
       topThreeTitle.textContent = isMonthly ? `${t.monthlyRank}(${monthLabel(appData.club.currentMonth)})` : isCouple ? t.coupleAward : t.yearlyRank;
-      topThreeList.innerHTML = list.map((member, index) => {
-        const score = isMonthly ? memberMonthStars(member) : isCouple ? memberCoupleStars(member) : member.stars;
+      topThreeList.innerHTML = list.length ? list.map(({ member, score }, index) => {
         return `<button class="w-full flex items-center justify-between gap-4 border border-amber-100 rounded p-4 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition text-left" data-top-member="${member.name}">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded bg-rotary-gold text-white font-black flex items-center justify-center">${index + 1}</div>
+            <div class="w-8 h-8 rounded bg-rotary-gold text-white font-black flex items-center justify-center">${displayRank(index)}</div>
             <div>
               <p class="font-black">${member.name}</p>
               <p class="text-xs text-slate-500">${member.role}</p>
@@ -807,7 +814,7 @@
           </div>
           <p class="font-black rotary-gold">${score} ${t.stars}</p>
         </button>`;
-      }).join("");
+      }).join("") : `<div class="text-center text-slate-500 py-8">${t.noMonthlyRecord}</div>`;
       document.querySelectorAll("[data-top-member]").forEach((row) => row.addEventListener("click", () => {
         closeTopThreeModal();
         openMemberModal(row.dataset.topMember);
