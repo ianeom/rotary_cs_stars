@@ -104,16 +104,8 @@
           <div class="mt-6 grid grid-cols-2 lg:grid-cols-5 gap-3" id="dashboardCards"></div>
         </div>
         <div class="gold-panel rounded-lg p-5">
-          <div class="flex justify-between items-end mb-2">
-            <div>
-              <p id="goalLabel" class="text-xs font-bold text-slate-500"></p>
-              <p class="text-2xl font-black"><span id="currentStars">0</span> / <span id="goalStars">0</span></p>
-            </div>
-            <p class="text-3xl font-black rotary-gold" id="progressRate">0%</p>
-          </div>
-          <div class="w-full h-4 bg-white border border-slate-200 rounded-full overflow-hidden">
-            <div id="progressBar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full" style="width:0%"></div>
-          </div>
+          <p id="goalLabel" class="text-xs font-bold text-slate-500"></p>
+          <div id="goalBreakdown" class="mt-4 space-y-5"></div>
           <p id="goalNote" class="text-xs text-slate-500 mt-3"></p>
         </div>
       </div>
@@ -252,6 +244,13 @@
       rulesTitle: "\u6458\u661f\u898f\u5247\u624b\u518a",
       stars: "\u661f",
       totalStars: "\u5168\u793e\u7e3d\u661f\u6578",
+      clubStats: "\u793e\u4e0a\u7d71\u8a08",
+      districtStats: "\u5730\u5340\u7d71\u8a08",
+      focusStats: "\u5e74\u5ea6\u7126\u9ede",
+      clubStars: "\u793e\u4e0a\u661f\u6578",
+      districtStars: "\u5730\u5340\u661f\u6578",
+      clubMonthStars: "\u793e\u4e0a\u672c\u6708",
+      districtMonthStars: "\u5730\u5340\u672c\u6708",
       monthKing: "\u672c\u6708\u6458\u661f\u738b",
       yearKing: "\u5e74\u5ea6\u6458\u661f\u738b",
       presidentValue: "\u793e\u9577\u8ca2\u737b\u503c",
@@ -340,6 +339,7 @@
       role: "\u8eab\u4efd",
       status: "\u72c0\u614b",
       note: "\u5099\u8a3b",
+      category: "\u7d71\u8a08\u985e\u5225",
       month: "\u6708\u4efd",
       date: "\u65e5\u671f",
       activity: "\u6d3b\u52d5",
@@ -362,6 +362,13 @@
     function memberMonthStars(member, monthKey = appData.club.currentMonth) {
       return (member.history || [])
         .filter((item) => item.date && item.date.startsWith(monthKey))
+        .reduce((sum, item) => sum + Number(item.stars || 0), 0);
+    }
+
+    function memberCategoryStars(member, category, monthKey = "") {
+      return (member.history || [])
+        .filter((item) => recordCategory(item) === category)
+        .filter((item) => !monthKey || (item.date && item.date.startsWith(monthKey)))
         .reduce((sum, item) => sum + Number(item.stars || 0), 0);
     }
 
@@ -482,7 +489,8 @@
           date: parseSheetDate(row[sheetColumns.date]),
           activity: row[sheetColumns.activity] || "",
           stars: recordStars,
-          note: parseRecordNote(row)
+          note: parseRecordNote(row),
+          category: parseRecordCategory(row)
         };
         if (!records.has(key)) records.set(key, []);
         records.get(key).push(item);
@@ -546,6 +554,26 @@
       const note = row[sheetColumns.note] || "";
       const starsText = row[sheetColumns.stars] || "";
       return note || (parseSheetNumber(starsText) > 0 ? "" : starsText);
+    }
+
+    function parseRecordCategory(row) {
+      const explicit = String(row[sheetColumns.category] || row["\u5206\u985e"] || row["category"] || "").trim();
+      if (explicit) return explicit.includes("\u5730\u5340") ? "district" : "club";
+      return inferRecordCategory({
+        activity: row[sheetColumns.activity],
+        galaxy: row["\u661f\u7cfb"],
+        note: parseRecordNote(row)
+      });
+    }
+
+    function recordCategory(record) {
+      if (record.category === "district" || record.category === "club") return record.category;
+      return inferRecordCategory(record);
+    }
+
+    function inferRecordCategory(record) {
+      const text = [record.activity, record.galaxy, record.note].map((value) => String(value || "")).join(" ");
+      return /\u5730\u5340|\u806f\u5408\u9996\u6572|\u806f\u5408\u4f8b\u6703|PETS|RLI|\u570b\u969b\u5e74\u6703|\u5730\u5e36|\u7814\u7fd2|\u8b1b\u7fd2/.test(text) ? "district" : "club";
     }
 
     function parseSheetMonth(value) {
@@ -621,6 +649,8 @@
       const total = members.reduce((sum, m) => sum + m.stars, 0);
       const currentMonth = appData.club.currentMonth;
       const currentMonthLabel = monthLabel(currentMonth);
+      const clubTotal = members.reduce((sum, member) => sum + memberCategoryStars(member, "club"), 0);
+      const districtTotal = members.reduce((sum, member) => sum + memberCategoryStars(member, "district"), 0);
       const monthWinner = members
         .map((member) => ({ ...member, currentMonthStars: memberMonthStars(member, currentMonth) }))
         .sort((a, b) => b.currentMonthStars - a.currentMonthStars)[0];
@@ -628,11 +658,28 @@
         .map((member) => ({ ...member, coupleStars: memberCoupleStars(member) }))
         .sort((a, b) => b.coupleStars - a.coupleStars)[0];
       const president = members.find((m) => m.role === "\u793e\u9577");
-      const rate = appData.club.goalStars ? Math.min(Math.round(total / appData.club.goalStars * 100), 100) : 0;
-      currentStars.textContent = `${total.toLocaleString()} ${t.stars}`;
-      goalStars.textContent = `${appData.club.goalStars.toLocaleString()} ${t.stars}`;
-      progressRate.textContent = `${rate}%`;
-      progressBar.style.width = `${rate}%`;
+      const clubGoal = Number(appData.club.clubGoalStars || appData.club.goalStars || 0);
+      const districtGoal = Number(appData.club.districtGoalStars || 0);
+      const goalRows = [
+        { label: t.clubStats, stars: clubTotal, goal: clubGoal, icon: "fa-house-flag" },
+        { label: t.districtStats, stars: districtTotal, goal: districtGoal, icon: "fa-globe" }
+      ];
+      goalBreakdown.innerHTML = goalRows.map((row) => {
+        const rate = row.goal ? Math.min(Math.round(row.stars / row.goal * 100), 100) : 0;
+        const denominator = row.goal ? ` / ${row.goal.toLocaleString()} ${t.stars}` : "";
+        return `<div>
+          <div class="flex items-end justify-between gap-3">
+            <div>
+              <p class="text-sm font-black text-slate-700 flex items-center gap-2"><i class="fa-solid ${row.icon} rotary-gold"></i>${row.label}</p>
+              <p class="text-2xl font-black mt-1">${row.stars.toLocaleString()} ${t.stars}<span class="text-sm text-slate-500 font-bold">${denominator}</span></p>
+            </div>
+            <p class="text-2xl font-black rotary-gold">${row.goal ? `${rate}%` : "-"}</p>
+          </div>
+          <div class="w-full h-3 bg-white border border-slate-200 rounded-full overflow-hidden mt-2">
+            <div class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full" style="width:${rate}%"></div>
+          </div>
+        </div>`;
+      }).join("");
       dashboardCards.innerHTML = [
         { label: t.totalStars, value: `${total.toLocaleString()} ${t.stars}`, icon: "fa-star" },
         { label: `${t.monthKing}(${currentMonthLabel})`, value: monthWinner && monthWinner.currentMonthStars > 0 ? monthWinner.name : "-", icon: "fa-bolt", rankType: "monthly" },
