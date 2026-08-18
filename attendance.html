@@ -84,7 +84,12 @@
   <footer class="text-center py-8 text-xs text-slate-400">台北中山扶輪社 2026-27 例會出席與徽章</footer>
 
   <script>
-    const dataUrl = "data/attendance-records.csv";
+    const googleSheet = {
+      id: "167BBJdlNlOXLwFeudMwI_74680hfCHax",
+      attendanceGid: "927575057"
+    };
+    const fallbackDataUrl = "data/attendance-records.csv";
+    const sheetUrl = (gid) => `https://docs.google.com/spreadsheets/d/${googleSheet.id}/export?format=csv&gid=${gid}`;
     let rows = [];
     let selectedMonth = "";
     let sortState = { key: "name", direction: "asc" };
@@ -119,6 +124,12 @@
       if (row.some((value) => value.trim())) result.push(row);
       const headers = result.shift() || [];
       return result.map((values) => Object.fromEntries(headers.map((header, index) => [header.replace(/^\uFEFF/, ""), values[index] || ""])));
+    }
+
+    function hasAttendanceColumns(data) {
+      if (!data.length) return false;
+      const required = ["姓名", "日期", "例會", "是否出席", "是否配戴扶輪徽章"];
+      return required.every((key) => Object.prototype.hasOwnProperty.call(data[0], key));
     }
 
     function monthKey(dateText) {
@@ -241,11 +252,16 @@
 
     async function loadData() {
       try {
-        const response = await fetch(dataUrl, { cache: "no-store" });
-        if (!response.ok) throw new Error("missing attendance data");
-        rows = parseCsv(await response.text());
+        const response = await fetch(sheetUrl(googleSheet.attendanceGid), { cache: "no-store" });
+        if (!response.ok) throw new Error("missing Google Sheet attendance data");
+        const sheetRows = parseCsv(await response.text());
+        if (!hasAttendanceColumns(sheetRows)) throw new Error("invalid Google Sheet attendance data");
+        rows = sheetRows;
       } catch (error) {
-        rows = [];
+        const response = await fetch(fallbackDataUrl, { cache: "no-store" });
+        if (!response.ok) throw new Error("missing attendance data");
+        const fallbackRows = parseCsv(await response.text());
+        rows = hasAttendanceColumns(fallbackRows) ? fallbackRows : [];
       }
       render();
     }
