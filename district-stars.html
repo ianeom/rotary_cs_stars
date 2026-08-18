@@ -95,7 +95,10 @@
           </div>
         </div>
         <div>
-          <h3 class="font-black mb-3">地區明細</h3>
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <h3 id="recordListTitle" class="font-black">地區明細</h3>
+            <button id="clearMemberBtn" class="hidden text-xs font-bold rotary-gold hover:underline" type="button">查看全部</button>
+          </div>
           <div id="recordList" class="space-y-2 max-h-[520px] overflow-y-auto"></div>
         </div>
       </div>
@@ -114,6 +117,7 @@
     let members = [];
     let records = [];
     let selectedMonth = "";
+    let selectedMember = "";
 
     const sheetUrl = (gid) => `https://docs.google.com/spreadsheets/d/${googleSheet.id}/export?format=csv&gid=${gid}`;
 
@@ -215,14 +219,41 @@
         render();
       }));
 
-      rankBody.innerHTML = ranked.map((member, index) => `<tr class="hover:bg-slate-50">
+      if (selectedMember && !ranked.some((member) => memberKey(member.name) === memberKey(selectedMember))) {
+        selectedMember = "";
+      }
+      const detailRecords = selectedMember
+        ? monthRecords.filter((record) => memberKey(record.name) === memberKey(selectedMember))
+        : monthRecords;
+
+      rankBody.innerHTML = ranked.map((member, index) => {
+        const isSelected = memberKey(member.name) === memberKey(selectedMember);
+        return `<tr class="cursor-pointer ${isSelected ? "bg-amber-50 hover:bg-amber-50" : "hover:bg-slate-50"}" data-member="${member.name}">
         <td class="py-3 px-4 text-center font-black text-slate-500">${index + 1}</td>
-        <td class="py-3 px-4 font-bold">${member.name}<span class="text-xs text-slate-400 ml-2">${member.role}</span></td>
+        <td class="py-3 px-4 font-bold">
+          <div class="flex items-center gap-2">
+            <span>${member.name}</span>
+            <span class="text-xs text-slate-400">${member.role}</span>
+            ${isSelected ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">明細</span>` : ""}
+          </div>
+        </td>
         <td class="py-3 px-4 text-right">${member.monthStars} 星</td>
         <td class="py-3 px-4 text-right font-black rotary-gold">${member.yearStars} 星</td>
-      </tr>`).join("");
+      </tr>`;
+      }).join("");
+      document.querySelectorAll("[data-member]").forEach((row) => row.addEventListener("click", () => {
+        selectedMember = selectedMember === row.dataset.member ? "" : row.dataset.member;
+        render();
+      }));
 
-      recordList.innerHTML = monthRecords.length ? monthRecords
+      recordListTitle.textContent = selectedMember ? `${selectedMember} 地區明細` : "地區明細";
+      clearMemberBtn.classList.toggle("hidden", !selectedMember);
+      clearMemberBtn.onclick = () => {
+        selectedMember = "";
+        render();
+      };
+
+      recordList.innerHTML = detailRecords.length ? detailRecords
         .sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name))
         .map((record) => `<div class="bg-white border border-amber-100 rounded p-3 flex items-center justify-between gap-3">
           <div>
@@ -230,7 +261,7 @@
             <p class="font-bold">${record.activity}</p>
           </div>
           <p class="font-black rotary-gold shrink-0">+${record.stars} 星</p>
-        </div>`).join("") : `<div class="text-center text-slate-500 py-8">目前沒有地區星星紀錄</div>`;
+        </div>`).join("") : `<div class="text-center text-slate-500 py-8">${selectedMember ? "這位社友本月暫無地區星星紀錄" : "目前沒有地區星星紀錄"}</div>`;
     }
 
     async function loadData() {
