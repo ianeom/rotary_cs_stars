@@ -1,73 +1,143 @@
 # Google Sheets Backend
 
-This project uses Google Sheets as the editable back office.
+網站使用 Google Sheets 當後台資料庫。
 
-The production website uses Plan A: `index.html` reads Google Sheets CSV exports directly in the browser. `data/site-data.json` is now only a fallback shell and stores the fixed seven-galaxy rule cards.
+正式上線模式：
 
-## Sheets
+- `index.html` 讀「社友清單」「摘星地圖」「摘星紀錄」
+- `district-stars.html` 讀「社友清單」「地區星星」
+- `attendance.html` 目前讀 `data/attendance-records.csv`，之後可再改成讀 Google Sheet「例會出席」
 
-### 社友清單
+Google Sheet ID：
 
-Required columns:
-
-| 欄位 | 說明 |
-| --- | --- |
-| 姓名 | Must match names used in 摘星紀錄 |
-| 寶(尊)眷 | Optional spouse/family display |
-| 身份 | Example: 社長, 社友 |
-| 狀態 | Use 啟用 or 停用. Empty means 啟用 |
-| 備註 | Optional |
-
-### 摘星地圖
-
-Required columns:
-
-| 欄位 | 說明 |
-| --- | --- |
-| 月份 | Example: 2026年8月 |
-| 日期 | Example: 8/5 or 2026/8/5 |
-| 活動 | Activity name |
-| 星數 | Number of stars |
-| 狀態 | 已完成, 可參加, or 規劃中 |
-
-### 摘星紀錄
-
-Required columns:
-
-| 欄位 | 說明 |
-| --- | --- |
-| 姓名 | Must match 社友清單 |
-| 日期 | Example: 2026/8/5 |
-| 活動 | Activity or reason |
-| 星數 | Number of stars |
-| 備註 | Optional |
-
-## Production Update Flow
-
-For normal updates, edit Google Sheets only:
-
-- Update `社友清單` to add, disable, or edit members
-- Update `摘星地圖` to change monthly activities
-- Update `摘星紀錄` to change member star records
-
-After saving Google Sheets, refresh the website. GitHub Pages does not need a new upload for data-only changes.
-
-The Google Sheet must remain viewable by anyone with the link.
-
-## Manual Sync Files
-
-These files are only for local backup, debugging, or generating fallback JSON.
-
-Download these CSV files into the project root:
-
-- `google-sheet-members.csv`
-- `google-sheet-star-map.csv`
-- `google-sheet-star-records.csv`
-
-Then run:
-
-```powershell
-& 'C:\Users\neo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' 'tools\sync_google_csv.py'
+```text
+167BBJdlNlOXLwFeudMwI_74680hfCHax
 ```
 
-If a sheet has only headers and no rows, the sync script preserves existing local website data for that section.
+## 工作表
+
+### 1. 社友清單
+
+目前 gid：
+
+```text
+135569316
+```
+
+欄位：
+
+```text
+姓名	寶(尊)眷	身份	狀態	備註
+```
+
+用途：
+
+- 社友星星
+- 地區星星
+- 例會出席
+
+都會用這張判斷社員名單。
+
+### 2. 摘星地圖
+
+目前 gid：
+
+```text
+1946869433
+```
+
+欄位：
+
+```text
+月份	日期	星系	活動	星數	狀態
+```
+
+用途：
+
+- 主頁「月度戰況與歷史得獎牆」
+- 顯示每個月有哪些活動可以取得星星
+
+### 3. 摘星紀錄
+
+目前 gid：
+
+```text
+1334576869
+```
+
+這張不動，整張都視為「社友星星」。
+
+欄位：
+
+```text
+姓名	日期	活動	星系	星數	備註
+```
+
+範例：
+
+```text
+Neo	2026-07-18	花蓮捐贈	服務之星	1	社友星星
+Alan Wen	2026-07-01	例會(夫妻)	神仙眷侶獎	1	神仙眷侶獎
+```
+
+不要放：
+
+- 累計
+- 小計
+- 授獎人次
+
+避免重複計算。
+
+### 4. 地區星星
+
+新增工作表，建立後把 gid 填入 `district-stars.html` 的 `districtRecordsGid`。
+
+欄位：
+
+```text
+姓名	日期	活動	星系	星數	備註
+```
+
+範例：
+
+```text
+Neo	2026-07-18	花蓮捐贈	服務之星	1	地區活動星星
+Ian	2026-07-01	地區聯合首敲	加強扶輪星	10	地區活動星星
+```
+
+用途：
+
+- `district-stars.html`
+- 地區年度目標 2000 星
+- 地區星星排行榜
+
+### 5. 例會出席
+
+之後若要改成 Google Sheet 直讀，可以新增這張。
+
+欄位：
+
+```text
+姓名	日期	例會	是否出席	是否配戴扶輪徽章
+```
+
+範例：
+
+```text
+Charles	2026-07-01	1705次例會	是	是
+Ian	2026-07-15	1707次例會	是	否
+Neo	2026-07-15	1707次例會	否	否
+```
+
+## 更新流程
+
+一般資料更新只改 Google Sheet：
+
+- 新增或停用社員：改「社友清單」
+- 更新每月活動地圖：改「摘星地圖」
+- 更新社友星星：改「摘星紀錄」
+- 更新地區星星：改「地區星星」
+
+Google Sheet 必須維持「知道連結的使用者可查看」。
+
+資料改完後，重新整理網站即可；只改資料不需要重新部署 GitHub Pages。

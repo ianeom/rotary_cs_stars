@@ -567,11 +567,7 @@
     function parseRecordCategory(row) {
       const explicit = String(row[sheetColumns.category] || row["\u5206\u985e"] || row["category"] || "").trim();
       if (explicit) return explicit.includes("\u5730\u5340") ? "district" : "club";
-      return inferRecordCategory({
-        activity: row[sheetColumns.activity],
-        galaxy: row["\u661f\u7cfb"],
-        note: parseRecordNote(row)
-      });
+      return "club";
     }
 
     function recordCategory(record) {

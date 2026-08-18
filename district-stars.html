@@ -108,7 +108,7 @@
     const googleSheet = {
       id: "167BBJdlNlOXLwFeudMwI_74680hfCHax",
       membersGid: "135569316",
-      recordsGid: "1334576869"
+      districtRecordsGid: ""
     };
     const districtGoal = 2000;
     let members = [];
@@ -179,13 +179,6 @@
       return String(name || "").replace(/\s/g, "").toLowerCase();
     }
 
-    function isDistrictRecord(row) {
-      const explicit = String(row["統計類別"] || row["分類"] || "").trim();
-      if (explicit) return explicit.includes("地區");
-      const text = [row["活動"], row["星系"], row["備註"]].map((value) => String(value || "")).join(" ");
-      return /\u5730\u5340|\u806f\u5408\u9996\u6572|\u806f\u5408\u4f8b\u6703|PETS|RLI|\u570b\u969b\u5e74\u6703|\u5730\u5e36|\u7814\u7fd2|\u8b1b\u7fd2/.test(text);
-    }
-
     function memberTotal(member, month = "") {
       return records
         .filter((record) => memberKey(record.name) === memberKey(member.name))
@@ -241,16 +234,22 @@
     }
 
     async function loadData() {
+      if (!googleSheet.districtRecordsGid) {
+        members = [];
+        records = [];
+        render();
+        return;
+      }
+
       const [membersCsv, recordsCsv] = await Promise.all([
         fetch(sheetUrl(googleSheet.membersGid)).then((response) => response.text()),
-        fetch(sheetUrl(googleSheet.recordsGid)).then((response) => response.text())
+        fetch(sheetUrl(googleSheet.districtRecordsGid)).then((response) => response.text())
       ]);
       members = parseCsv(membersCsv)
         .filter((row) => row["姓名"])
         .map((row) => ({ name: row["姓名"], role: row["身份"] || "社友", status: row["狀態"] || "啟用" }))
         .filter((member) => member.status !== "停用");
       records = parseCsv(recordsCsv)
-        .filter(isDistrictRecord)
         .map((row) => ({
           name: row["姓名"],
           date: parseDate(row["日期"]),
